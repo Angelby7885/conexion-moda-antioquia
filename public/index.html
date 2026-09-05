@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rueda de Negocios B2B - Conexión Moda Antioquia</title>
+  <style>
+    :root {
+      --primary-blue: #1E295B;
+      --cyan-moda: #00A3E0;
+      --bg-light: #F4F6F8;
+      --card-bg: #FFFFFF;
+      --text-main: #2D3748;
+      --text-muted: #718096;
+      --border-color: #E2E8F0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-light);
+      margin: 0;
+      padding: 0;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--card-bg);
+      border-bottom: 2px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-logo img {
+      height: 42px;
+      object-fit: contain;
+    }
+
+    .header-nav { display: flex; gap: 8px; align-items: center; }
+
+    .btn-nav {
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-nav:hover { background-color: #141c3d; }
+    .btn-outline { background-color: transparent; color: var(--primary-blue); border: 2px solid var(--primary-blue); }
+
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 25px 15px;
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      width: 100%;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(30, 41, 91, 0.08);
+      border: 1px solid var(--border-color);
+      box-sizing: border-box;
+    }
+    .login-card h2 { color: var(--primary-blue); margin-top: 0; font-size: 22px; text-align: center; margin-bottom: 5px; }
+    .login-card p { text-align: center; color: var(--text-muted); font-size: 13px; margin-bottom: 25px; }
+    
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; color: var(--text-main); }
+    .form-group input { width: 100%; padding: 10px 12px; border: 1px solid #CBD5E0; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #F8FAFC; }
+    .form-group input:focus { outline: none; border-color: var(--cyan-moda); background: white; }
+
+    .login-btn { width: 100%; background: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+    .login-btn:hover { background: #141c3d; }
+    
+    .register-link { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted); }
+    .register-link a { color: var(--cyan-moda); font-weight: bold; text-decoration: none; }
+
+    .welcome-banner { text-align: center; margin-bottom: 15px; width: 100%; }
+    .welcome-banner h2 { margin: 0 0 5px; color: var(--primary-blue); font-size: 20px; }
+    .welcome-banner p { margin: 0; color: var(--text-muted); font-size: 13px; }
+
+    .swipe-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      width: 100%;
+      box-shadow: 0 10px 25px rgba(30, 41, 91, 0.08);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .card-img-container { width: 100%; height: 230px; background: #E2E8F0; position: relative; }
+    .card-img { width: 100%; height: 100%; object-fit: cover; }
+    .role-badge {
+      position: absolute; top: 12px; right: 12px; background: rgba(30, 41, 91, 0.85); color: white; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase;
+    }
+
+    .card-body { padding: 20px; }
+    .card-title { font-size: 20px; font-weight: bold; color: var(--primary-blue); margin: 0 0 4px; display: flex; justify-content: space-between; align-items: center; }
+    .card-id { font-size: 12px; color: var(--text-muted); font-weight: normal; }
+    .card-location { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+    .card-section { margin-bottom: 10px; font-size: 13px; line-height: 1.4; }
+    .card-section b { color: var(--primary-blue); }
+
+    .tags-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .tag { background: #EBF8FF; color: #0077B6; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+
+    .actions-container { display: flex; justify-content: center; gap: 30px; width: 100%; margin-top: 5px; }
+    .action-btn {
+      width: 65px; height: 65px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 26px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.1s;
+    }
+    .action-btn:active { transform: scale(0.92); }
+    .btn-dislike { background: #FFF5F5; color: #E53E3E; border: 2px solid #FEB2B2; }
+    .btn-like { background: #F0FFF4; color: #38A169; border: 2px solid #9AE6B4; }
+
+    .empty-state { text-align: center; padding: 40px 20px; background: var(--card-bg); border-radius: 16px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .empty-state h3 { color: var(--primary-blue); margin-bottom: 10px; }
+
+    /* Footer con Logos Equilibrados de Aliados */
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 25px 15px;
+      text-align: center;
+      margin-top: auto;
+    }
+    .allies-title { 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 1.5px; 
+      color: var(--text-muted); 
+      margin-bottom: 15px; 
+      font-weight: bold; 
+    }
+    .allies-grid { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      gap: 30px; 
+      flex-wrap: wrap; 
+    }
+    .ally-logo { 
+      object-fit: contain; 
+      opacity: 0.95; 
+      transition: opacity 0.2s;
+    }
+    .ally-logo:hover { opacity: 1; }
+
+    .logo-transmetano { height: 70px; }
+    .logo-promigas { height: 35px; }
+    .logo-inexmoda { height: 65px; }
+    .logo-comfama { height: 30px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="brand-logo">
+      <img src="/images/logo-conexion.png" alt="Conexión Moda Antioquia">
+    </a>
+    <div class="header-nav" id="headerNav"></div>
+  </header>
+
+  <div class="main-container" id="mainContainer"></div>
+
+  <footer>
+    <div class="allies-title">Aliados Institucionales</div>
+    <div class="allies-grid">
+      <img src="/images/logo-transmetano.png" alt="Transmetano" class="ally-logo logo-transmetano">
+      <img src="/images/logo-promigas.png" alt="Fundación Promigas" class="ally-logo logo-promigas">
+      <img src="/images/logo-inexmoda.png" alt="Inexmoda" class="ally-logo logo-inexmoda">
+      <img src="/images/logo-comfama.png" alt="Comfama" class="ally-logo logo-comfama">
+    </div>
+  </footer>
+
+  <script>
+    function getLoggedInUser() {
+      const keys = ['user', 'currentUser', 'loggedInUser', 'userData'];
+      for (const key of keys) {
+        const item = localStorage.getItem(key);
+        if (item) {
+          try {
+            const parsed = JSON.parse(item);
+            if (parsed && (parsed.id || parsed._id)) {
+              return { id: parsed.id || parsed._id, name: parsed.name || parsed.id, ...parsed };
+            }
+          } catch(e) {
+            if (item.trim()) return { id: item.trim(), name: item.trim() };
+          }
+        }
+      }
+      return null;
+    }
+
+    let profiles = [];
+    let currentIndex = 0;
+    const currentUser = getLoggedInUser();
+
+    function renderView() {
+      const headerNav = document.getElementById('headerNav');
+      const mainContainer = document.getElementById('mainContainer');
+
+      if (!currentUser) {
+        headerNav.innerHTML = `<a href="/register" class="btn-nav btn-outline">Registrarse</a>`;
+        mainContainer.innerHTML = `
+          <div class="login-card">
+            <h2>Iniciar Sesión</h2>
+            <p>Accede a la Rueda de Negocios B2B</p>
+            <form onsubmit="handleLogin(event)">
+              <div class="form-group">
+                <label>Correo Electrónico:</label>
+                <input type="email" id="loginEmail" required placeholder="tu@correo.com">
+              </div>
+              <div class="form-group">
+                <label>Contraseña:</label>
+                <input type="password" id="loginPassword" required placeholder="••••••••">
+              </div>
+              <button type="submit" class="login-btn">Ingresar</button>
+            </form>
+            <div class="register-link">
+              ¿Tu empresa no está registrada? <a href="/register">Regístrate aquí</a>
+            </div>
+          </div>
+        `;
+      } else {
+        // Redirección automática si intenta entrar al explorador siendo admin
+        if (currentUser.email === 'admin@conexionmoda.com' || currentUser.isAdmin) {
+          window.location.href = '/admin';
+          return;
+        }
+
+        headerNav.innerHTML = `
+          <a href="/matches" class="btn-nav">⭐ Mis Likes y Agenda</a>
+          <button class="btn-nav btn-outline" onclick="logout()">Salir</button>
+        `;
+        mainContainer.innerHTML = `
+          <div class="welcome-banner">
+            <h2>Explorador de Empresas</h2>
+            <p>Conectado como: <b>${currentUser.name || currentUser.id}</b></p>
+          </div>
+          <div id="cardWrapper" style="width: 100%;">
+            <p style="text-align: center; color: var(--text-muted);">Cargando perfiles...</p>
+          </div>
+          <div id="actionButtons" class="actions-container" style="display: none;">
+            <button class="action-btn btn-dislike" onclick="handleSwipe('dislike')" title="Descartar">❌</button>
+            <button class="action-btn btn-like" onclick="handleSwipe('like')" title="Me Interesa (Like)">❤️</button>
+          </div>
+        `;
+        loadProfiles();
+      }
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Credenciales inválidas');
+
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Redirección inteligente: Admin a /admin, Usuario normal a /matches
+        if (data.user.email === 'admin@conexionmoda.com' || data.user.isAdmin) {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/matches';
+        }
+      } catch (err) {
+        alert('Error al iniciar sesión: ' + err.message);
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.reload();
+    }
+
+    async function loadProfiles() {
+      try {
+        const res = await fetch(`/api/profiles/${currentUser.id}`);
+        profiles = await res.json();
+        if (!res.ok) throw new Error('Error al cargar perfiles');
+
+        currentIndex = 0;
+        renderCurrentProfile();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('cardWrapper').innerHTML = '<div class="empty-state"><h3>Error</h3><p>No se pudieron cargar los perfiles.</p></div>';
+      }
+    }
+
+    function renderCurrentProfile() {
+      const wrapper = document.getElementById('cardWrapper');
+      const actionBtns = document.getElementById('actionButtons');
+
+      if (profiles.length === 0 || currentIndex >= profiles.length) {
+        wrapper.innerHTML = `
+          <div class="empty-state">
+            <h3>¡Has explorado todas las empresas!</h3>
+            <p>No hay más perfiles disponibles en este momento.</p>
+            <a href="/matches" class="btn-nav" style="display:inline-block; margin-top:15px;">Ver mis Likes y Agenda ➔</a>
+          </div>`;
+        actionBtns.style.display = 'none';
+        return;
+      }
+
+      const p = profiles[currentIndex];
+      actionBtns.style.display = 'flex';
+
+      const garments = Array.isArray(p.garmentTypes) ? p.garmentTypes.join(', ') : (p.garmentTypes || 'N/A');
+      const roles = Array.isArray(p.roles) ? p.roles.join(', ') : 'N/A';
+
+      let detailsHTML = '';
+      if (p.providerDetails) {
+        detailsHTML = `
+          <div class="card-section"><b>Capacidad:</b> ${p.providerDetails.capacity || 0} unds | <b>Valor Minuto:</b> $${p.providerDetails.minuteValue || 0}</div>
+          <div class="card-section"><b>Empleados:</b> ${p.providerDetails.employeesCount || 0} | <b>Maquinaria:</b> ${p.providerDetails.availableMachinery || 'N/A'}</div>
+        `;
+      } else if (p.anclaDetails) {
+        detailsHTML = `
+          <div class="card-section"><b>Volumen Requerido:</b> ${p.anclaDetails.requiredVolume || 0} unds</div>
+          <div class="card-section"><b>Categoría:</b> ${p.anclaDetails.productCategory || 'N/A'}</div>
+        `;
+      }
+
+      wrapper.innerHTML = `
+        <div class="swipe-card">
+          <div class="card-img-container">
+            <img src="${p.profileImage || 'https://via.placeholder.com/400x230?text=Sin+Imagen'}" class="card-img" alt="Foto">
+            <span class="role-badge">${roles}</span>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">${p.name} <span class="card-id">(${p.id})</span></h3>
+            <div class="card-location">📍 ${p.location}</div>
+            
+            <div class="card-section"><b>Actividad:</b> ${p.spec}</div>
+
+            <div class="card-section">
+              <b>Tipos de Prenda:</b>
+              <div class="tags-container">
+                ${garments.split(',').map(g => `<span class="tag">${g.trim()}</span>`).join('')}
+              </div>
+            </div>
+
+            ${detailsHTML}
+          </div>
+        </div>
+      `;
+    }
+
+    async function handleSwipe(action) {
+      if (profiles.length === 0 || currentIndex >= profiles.length) return;
+      const targetProfile = profiles[currentIndex];
+
+      try {
+        await fetch('/api/swipe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ senderId: currentUser.id, targetId: targetProfile.id, action: action })
+        });
+        currentIndex++;
+        renderCurrentProfile();
+      } catch (err) {
+        alert('Error al procesar acción: ' + err.message);
+      }
+    }
+
+    renderView();
+  </script>
+</body>
+</html>
