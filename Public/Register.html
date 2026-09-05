@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso y Registro - Conexión Moda Antioquia</title>
+  <style>
+    :root {
+      --primary-blue: #1E295B;
+      --cyan-moda: #00A3E0;
+      --bg-light: #F4F6F8;
+      --card-bg: #FFFFFF;
+      --text-main: #2D3748;
+      --text-muted: #718096;
+      --border-color: #E2E8F0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-light);
+      margin: 0;
+      padding: 0;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--card-bg);
+      border-bottom: 2px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-logo img { 
+      height: 42px; 
+      object-fit: contain; 
+    }
+
+    .btn-nav {
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-nav:hover { background-color: #141c3d; }
+    .btn-outline { background-color: transparent; color: var(--primary-blue); border: 2px solid var(--primary-blue); }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      margin: 30px auto;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(30, 41, 91, 0.06);
+      box-sizing: border-box;
+      flex: 1;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: #EDF2F7;
+      padding: 4px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+    }
+    .auth-tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .auth-tab-btn.active {
+      background: var(--primary-blue);
+      color: white;
+      box-shadow: 0 2px 6px rgba(30, 41, 91, 0.2);
+    }
+
+    .auth-section { display: none; }
+    .auth-section.active { display: block; }
+
+    h1 { color: var(--primary-blue); margin-bottom: 5px; font-size: 24px; text-align: center; }
+    .subtitle { color: var(--text-muted); margin-bottom: 20px; font-size: 14px; text-align: center; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 13px; color: var(--text-main); }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 12px; border: 1px solid #CBD5E0; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #F8FAFC;
+    }
+    .form-group input:focus { outline: none; border-color: var(--cyan-moda); background: white; }
+
+    .checkbox-group { display: flex; gap: 20px; margin-top: 5px; }
+    .checkbox-label { display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer; font-size: 14px; }
+
+    .conditional-section {
+      background: #F1F5F9; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 15px; display: none;
+    }
+
+    .btn-submit {
+      background-color: var(--primary-blue); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 15px;
+    }
+    .btn-submit:hover { background-color: #141c3d; }
+
+    .alert { padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; display: none; }
+    .alert-error { background-color: #FED7D7; color: #742A2A; border: 1px solid #FEB2B2; }
+    .alert-success { background-color: #C6F6D5; color: #22543D; border: 1px solid #9AE6B4; }
+
+    /* Footer con Logos Equilibrados de Aliados */
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 25px 15px;
+      text-align: center;
+      margin-top: auto;
+    }
+    .allies-title { 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 1.5px; 
+      color: var(--text-muted); 
+      margin-bottom: 15px; 
+      font-weight: bold; 
+    }
+    .allies-grid { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      gap: 30px; 
+      flex-wrap: wrap; 
+    }
+    .ally-logo { 
+      object-fit: contain; 
+      opacity: 0.95; 
+      transition: opacity 0.2s;
+    }
+    .ally-logo:hover { opacity: 1; }
+
+    .logo-transmetano { height: 70px; }
+    .logo-promigas { height: 35px; }
+    .logo-inexmoda { height: 65px; }
+    .logo-comfama { height: 30px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="brand-logo">
+      <img src="/images/logo-conexion.png" alt="Conexión Moda Antioquia">
+    </a>
+    <div>
+      <a href="/" class="btn-nav btn-outline">Ir al Explorador</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="alertBox" class="alert"></div>
+
+    <div class="auth-tabs">
+      <button id="tabLoginBtn" class="auth-tab-btn active" onclick="switchAuthTab('login')">🔑 Iniciar Sesión</button>
+      <button id="tabRegisterBtn" class="auth-tab-btn" onclick="switchAuthTab('register')">📝 Crear Cuenta</button>
+    </div>
+
+    <div id="loginSection" class="auth-section active">
+      <h1>Iniciar Sesión</h1>
+      <p class="subtitle">Accede a tu cuenta en la Rueda de Negocios B2B</p>
+      
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Correo Electrónico:</label>
+          <input type="email" id="loginEmail" required placeholder="tu@correo.com">
+        </div>
+        <div class="form-group">
+          <label>Contraseña:</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-submit">Ingresar a la Plataforma</button>
+      </form>
+    </div>
+
+    <div id="registerSection" class="auth-section">
+      <h1>Registro de Empresa</h1>
+      <p class="subtitle">Completa el cuestionario para unirte a Conexión Moda Antioquia</p>
+
+      <form id="registerForm" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>ID de Empresa / NIT (Único):</label>
+          <input type="text" id="regId" placeholder="Ej. conf_01" required>
+        </div>
+
+        <div class="form-group">
+          <label>Nombre de la Empresa:</label>
+          <input type="text" id="regName" placeholder="Ej. Confecciones del Sur" required>
+        </div>
+
+        <div class="form-group">
+          <label>Correo Electrónico:</label>
+          <input type="email" id="regEmail" placeholder="empresa@correo.com" required>
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña:</label>
+          <input type="password" id="regPassword" placeholder="••••••••" required>
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono de Contacto:</label>
+          <input type="text" id="regPhone" placeholder="3001234567" required>
+        </div>
+
+        <div class="form-group">
+          <label>Ubicación (Municipio / Ciudad):</label>
+          <input type="text" id="regLocation" placeholder="Medellín, Antioquia" required>
+        </div>
+
+        <div class="form-group">
+          <label>Especialidad / Descripción:</label>
+          <input type="text" id="regSpec" placeholder="Fabricación de prendas y maquila" required>
+        </div>
+
+        <div class="form-group">
+          <label>Tipos de Prenda (separados por coma):</label>
+          <input type="text" id="regGarments" placeholder="Jeans, Camisas, Vestidos" required>
+        </div>
+
+        <div class="form-group">
+          <label>Selecciona tus Roles en el Evento:</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label"><input type="checkbox" name="role" value="provider" onchange="toggleRoleSections()"> Proveedor</label>
+            <label class="checkbox-label"><input type="checkbox" name="role" value="ancla" onchange="toggleRoleSections()"> Empresa Ancla</label>
+          </div>
+        </div>
+
+        <div id="providerSection" class="conditional-section">
+          <h4 style="margin: 0 0 10px; color: var(--primary-blue);">Detalles de Proveedor</h4>
+          <div class="form-group"><label>Capacidad (unds/mes):</label><input type="number" id="provCapacity" placeholder="5000"></div>
+          <div class="form-group"><label>Valor Minuto ($):</label><input type="number" id="provMinuteValue" placeholder="120"></div>
+          <div class="form-group"><label>Número de Empleados:</label><input type="number" id="provEmployees" placeholder="25"></div>
+          <div class="form-group"><label>Maquinaria:</label><input type="text" id="provMachinery" placeholder="Plana, Fileteadora"></div>
+        </div>
+
+        <div id="anclaSection" class="conditional-section">
+          <h4 style="margin: 0 0 10px; color: var(--primary-blue);">Detalles de Empresa Ancla</h4>
+          <div class="form-group"><label>Volumen Requerido (unds):</label><input type="number" id="anclaVolume" placeholder="10000"></div>
+          <div class="form-group"><label>Categoría:</label><input type="text" id="anclaCategory" placeholder="Ropa deportiva"></div>
+        </div>
+
+        <div class="form-group" style="margin-top: 15px;">
+          <label>Logo / Foto de Perfil:</label>
+          <input type="file" id="regImage" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">Completar Registro</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <div class="allies-title">Aliados Institucionales</div>
+    <div class="allies-grid">
+      <img src="/images/logo-transmetano.png" alt="Transmetano" class="ally-logo logo-transmetano">
+      <img src="/images/logo-promigas.png" alt="Fundación Promigas" class="ally-logo logo-promigas">
+      <img src="/images/logo-inexmoda.png" alt="Inexmoda" class="ally-logo logo-inexmoda">
+      <img src="/images/logo-comfama.png" alt="Comfama" class="ally-logo logo-comfama">
+    </div>
+  </footer>
+
+  <script>
+    function switchAuthTab(tab) {
+      document.getElementById('loginSection').classList.remove('active');
+      document.getElementById('registerSection').classList.remove('active');
+      document.getElementById('tabLoginBtn').classList.remove('active');
+      document.getElementById('tabRegisterBtn').classList.remove('active');
+      document.getElementById('alertBox').style.display = 'none';
+
+      if (tab === 'login') {
+        document.getElementById('loginSection').classList.add('active');
+        document.getElementById('tabLoginBtn').classList.add('active');
+      } else {
+        document.getElementById('registerSection').classList.add('active');
+        document.getElementById('tabRegisterBtn').classList.add('active');
+      }
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const alertBox = document.getElementById('alertBox');
+      alertBox.style.display = 'none';
+
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Credenciales inválidas');
+
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Redirección inteligente: Admin a /admin, Usuario normal a /matches
+        if (data.user.email === 'admin@conexionmoda.com' || data.user.isAdmin) {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/matches';
+        }
+      } catch (err) {
+        alertBox.className = 'alert alert-error';
+        alertBox.textContent = err.message;
+        alertBox.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function toggleRoleSections() {
+      const providerChecked = document.querySelector('input[value="provider"]').checked;
+      const anclaChecked = document.querySelector('input[value="ancla"]').checked;
+      document.getElementById('providerSection').style.display = providerChecked ? 'block' : 'none';
+      document.getElementById('anclaSection').style.display = anclaChecked ? 'block' : 'none';
+    }
+
+    async function handleRegister(event) {
+      event.preventDefault();
+      const alertBox = document.getElementById('alertBox');
+      alertBox.style.display = 'none';
+
+      const roles = Array.from(document.querySelectorAll('input[name="role"]:checked')).map(cb => cb.value);
+      if (roles.length === 0) {
+        alertBox.className = 'alert alert-error';
+        alertBox.textContent = 'Por favor selecciona al menos un rol (Proveedor o Ancla).';
+        alertBox.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('id', document.getElementById('regId').value.trim());
+      formData.append('name', document.getElementById('regName').value.trim());
+      formData.append('email', document.getElementById('regEmail').value.trim());
+      formData.append('password', document.getElementById('regPassword').value);
+      formData.append('phone', document.getElementById('regPhone').value.trim());
+      formData.append('location', document.getElementById('regLocation').value.trim());
+      formData.append('spec', document.getElementById('regSpec').value.trim());
+      
+      const garments = document.getElementById('regGarments').value.split(',').map(g => g.trim()).filter(g => g);
+      formData.append('garmentTypes', JSON.stringify(garments));
+      formData.append('roles', JSON.stringify(roles));
+
+      if (roles.includes('provider')) {
+        formData.append('providerDetails', JSON.stringify({
+          capacity: document.getElementById('provCapacity').value,
+          minuteValue: document.getElementById('provMinuteValue').value,
+          employeesCount: document.getElementById('provEmployees').value,
+          availableMachinery: document.getElementById('provMachinery').value
+        }));
+      }
+
+      if (roles.includes('ancla')) {
+        formData.append('anclaDetails', JSON.stringify({
+          requiredVolume: document.getElementById('anclaVolume').value,
+          productCategory: document.getElementById('anclaCategory').value
+        }));
+      }
+
+      const imageFile = document.getElementById('regImage').files[0];
+      if (imageFile) formData.append('image', imageFile);
+
+      try {
+        const btn = document.getElementById('submitBtn');
+        btn.textContent = 'Registrando...';
+        btn.disabled = true;
+
+        const res = await fetch('/api/register', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al registrar');
+
+        alertBox.className = 'alert alert-success';
+        alertBox.textContent = data.message + ' Redirigiendo a tu panel...';
+        alertBox.style.display = 'block';
+
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setTimeout(() => { window.location.href = '/matches'; }, 1000);
+
+      } catch (err) {
+        alertBox.className = 'alert alert-error';
+        alertBox.textContent = err.message;
+        alertBox.style.display = 'block';
+        const btn = document.getElementById('submitBtn');
+        btn.textContent = 'Completar Registro';
+        btn.disabled = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  </script>
+</body>
+</html>
