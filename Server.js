@@ -5,7 +5,7 @@ const multer = require('multer');
 const mongoose = require('mongoose');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // ==========================================
 // CONEXIÓN A MONGODB ATLAS
@@ -18,9 +18,9 @@ mongoose.connect(MONGODB_URI)
 
 // Definición de Modelos (Mongoose Schemas)
 const userSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true },
+  id: { type: String, required: true, unique: true, trim: true },
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
   phone: String,
   location: String,
@@ -65,7 +65,7 @@ const User = mongoose.model('User', userSchema);
 const Interaction = mongoose.model('Interaction', interactionSchema);
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 
-// Directorio para subida de imágenes locales temporales
+// Directorio para subida de imágenes (Carpeta public en minúscula)
 const uploadsDir = path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -91,24 +91,25 @@ const upload = multer({ storage: storage });
 // ==========================================
 
 app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  // 1. Verificación estricta de Administrador Maestro
-  if (email === 'admin@conexionmoda.com' && password === '12345678') {
-    const adminUser = {
-      id: 'admin',
-      name: 'Administrador General',
-      email: 'admin@conexionmoda.com',
-      roles: ['admin'],
-      isAdmin: true,
-      spec: 'Gestión y Optimización del Evento'
-    };
-    return res.json({ message: 'Login de administrador exitoso', user: adminUser });
-  }
-
-  // 2. Verificación de Usuarios en MongoDB Atlas
   try {
-    const user = await User.findOne({ email, password });
+    const emailInput = req.body.email ? req.body.email.toLowerCase().trim() : '';
+    const password = req.body.password;
+
+    // 1. Verificación estricta de Administrador Maestro
+    if (emailInput === 'admin@conexionmoda.com' && password === '12345678') {
+      const adminUser = {
+        id: 'admin',
+        name: 'Administrador General',
+        email: 'admin@conexionmoda.com',
+        roles: ['admin'],
+        isAdmin: true,
+        spec: 'Gestión y Optimización del Evento'
+      };
+      return res.json({ message: 'Login de administrador exitoso', user: adminUser });
+    }
+
+    // 2. Verificación en MongoDB Atlas (ignora mayúsculas y espacios gracias al esquema)
+    const user = await User.findOne({ email: emailInput, password });
     if (!user) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
     }
@@ -120,7 +121,10 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/register', upload.single('image'), async (req, res) => {
   try {
-    const existing = await User.findOne({ $or: [{ id: req.body.id }, { email: req.body.email }] });
+    const cleanEmail = req.body.email ? req.body.email.toLowerCase().trim() : '';
+    const cleanId = req.body.id ? req.body.id.trim() : '';
+
+    const existing = await User.findOne({ $or: [{ id: cleanId }, { email: cleanEmail }] });
     if (existing) {
       return res.status(400).json({ error: 'El ID o el Correo electrónico ya están registrados.' });
     }
@@ -138,9 +142,9 @@ app.post('/api/register', upload.single('image'), async (req, res) => {
     if (req.body.anclaDetails) { try { anclaDetails = JSON.parse(req.body.anclaDetails); } catch(e) {} }
 
     const newUser = new User({
-      id: req.body.id,
+      id: cleanId,
       name: req.body.name,
-      email: req.body.email,
+      email: cleanEmail,
       password: req.body.password,
       phone: req.body.phone,
       location: req.body.location,
