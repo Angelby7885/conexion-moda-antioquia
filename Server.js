@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
   spec: String,
   garmentTypes: [String],
   roles: [String],
-  profileImage: String,
+  profileImage: String, // Imagen segura en Base64
   providerDetails: {
     capacity: Number,
     minuteValue: Number,
@@ -65,26 +65,13 @@ const User = mongoose.model('User', userSchema);
 const Interaction = mongoose.model('Interaction', interactionSchema);
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 
-// Directorio para subida de imágenes (Carpeta public en minúscula)
-const uploadsDir = path.join(__dirname, 'public', 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
 // Middlewares esenciales
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuración de Multer para imágenes de perfil o logos
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'company-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-const upload = multer({ storage: storage });
+// Configuración de Multer en Memoria para guardar imágenes en Base64 en MongoDB
+const upload = multer({ storage: multer.memoryStorage() });
 
 // ==========================================
 // RUTAS DE AUTENTICACIÓN Y GESTIÓN DE USUARIOS
@@ -95,7 +82,7 @@ app.post('/api/login', async (req, res) => {
     const emailInput = req.body.email ? req.body.email.toLowerCase().trim() : '';
     const password = req.body.password;
 
-    // 1. Verificación estricta de Administrador Maestro
+    // 1. Verificación de Administrador Maestro
     if (emailInput === 'admin@conexionmoda.com' && password === '12345678') {
       const adminUser = {
         id: 'admin',
@@ -108,7 +95,7 @@ app.post('/api/login', async (req, res) => {
       return res.json({ message: 'Login de administrador exitoso', user: adminUser });
     }
 
-    // 2. Verificación en MongoDB Atlas (ignora mayúsculas y espacios gracias al esquema)
+    // 2. Verificación en MongoDB Atlas
     const user = await User.findOne({ email: emailInput, password });
     if (!user) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
@@ -141,6 +128,12 @@ app.post('/api/register', upload.single('image'), async (req, res) => {
     let anclaDetails = null;
     if (req.body.anclaDetails) { try { anclaDetails = JSON.parse(req.body.anclaDetails); } catch(e) {} }
 
+    // Procesar imagen a Base64
+    let profileImage = null;
+    if (req.file) {
+      profileImage = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    }
+
     const newUser = new User({
       id: cleanId,
       name: req.body.name,
@@ -151,7 +144,7 @@ app.post('/api/register', upload.single('image'), async (req, res) => {
       spec: req.body.spec,
       garmentTypes,
       roles,
-      profileImage: req.file ? `/uploads/${req.file.filename}` : null,
+      profileImage,
       providerDetails,
       anclaDetails
     });
@@ -171,7 +164,10 @@ app.post('/api/update-profile', upload.single('image'), async (req, res) => {
       location: req.body.location,
       spec: req.body.spec
     };
-    if (req.file) updateData.profileImage = `/uploads/${req.file.filename}`;
+
+    if (req.file) {
+      updateData.profileImage = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    }
 
     const updatedUser = await User.findOneAndUpdate({ id: req.body.id }, updateData, { new: true });
     if (!updatedUser) {
@@ -221,27 +217,24 @@ app.post('/api/swipe', async (req, res) => {
     const { senderId, targetId, action } = req.body;
     await Interaction.create({ senderId, targetId, action });
 
+    // Cada Like genera una cita de inmediato (unilateral)
     if (action === 'like') {
-      const mutualLike = await Interaction.findOne({ senderId: targetId, targetId: senderId, action: 'like' });
+      const existingApp = await Appointment.findOne({
+        $or: [
+          { requestedBy: senderId, targetUser: targetId },
+          { requestedBy: targetId, targetUser: senderId }
+        ]
+      });
 
-      if (mutualLike) {
-        const existingApp = await Appointment.findOne({
-          $or: [
-            { requestedBy: senderId, targetUser: targetId },
-            { requestedBy: targetId, targetUser: senderId }
-          ]
+      if (!existingApp) {
+        await Appointment.create({
+          id: `match_${Date.now()}_${Math.floor(Math.random()*1000)}`,
+          requestedBy: senderId,
+          targetUser: targetId,
+          status: 'PENDIENTE'
         });
-
-        if (!existingApp) {
-          await Appointment.create({
-            id: `match_${Date.now()}_${Math.floor(Math.random()*1000)}`,
-            requestedBy: senderId,
-            targetUser: targetId,
-            status: 'PENDIENTE'
-          });
-        }
-        return res.json({ message: '¡Hay Match y Cita Generada!', match: true });
       }
+      return res.json({ message: '¡Interés registrado y Cita Generada!', match: true });
     }
 
     res.json({ message: 'Swipe registrado correctamente', match: false });
