@@ -3,9 +3,33 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const mongoose = require('mongoose');
+const cloudinary = require('cloudinary').v2;
 
 const app = express();
 const PORT = process.env.PORT || 10000;
+
+// ==========================================
+// CONFIGURACIÓN DE CLOUDINARY
+// ==========================================
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Helper para subir archivos a Cloudinary desde la memoria
+const uploadToCloudinary = (fileBuffer) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: 'conexion_moda_antioquia' },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url); // Devuelve la URL pública y permanente
+      }
+    );
+    uploadStream.end(fileBuffer);
+  });
+};
 
 // ==========================================
 // CONEXIÓN A MONGODB ATLAS
@@ -27,7 +51,7 @@ const userSchema = new mongoose.Schema({
   spec: String,
   garmentTypes: [String],
   roles: [String],
-  profileImage: String, // Imagen segura en Base64
+  profileImage: String, // URL permanente de Cloudinary
   providerDetails: {
     capacity: Number,
     minuteValue: Number,
@@ -70,7 +94,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuración de Multer en Memoria para guardar imágenes en Base64 en MongoDB
+// Multer en memoria temporal para procesar la imagen antes de enviarla a Cloudinary
 const upload = multer({ storage: multer.memoryStorage() });
 
 // ==========================================
@@ -82,7 +106,7 @@ app.post('/api/login', async (req, res) => {
     const emailInput = req.body.email ? req.body.email.toLowerCase().trim() : '';
     const password = req.body.password;
 
-    // 1. Verificación de Administrador Maestro
+    // 1. Administrador Maestro
     if (emailInput === 'admin@conexionmoda.com' && password === '12345678') {
       const adminUser = {
         id: 'admin',
@@ -95,7 +119,7 @@ app.post('/api/login', async (req, res) => {
       return res.json({ message: 'Login de administrador exitoso', user: adminUser });
     }
 
-    // 2. Verificación en MongoDB Atlas
+    // 2. Usuarios en MongoDB Atlas
     const user = await User.findOne({ email: emailInput, password });
     if (!user) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
@@ -128,10 +152,10 @@ app.post('/api/register', upload.single('image'), async (req, res) => {
     let anclaDetails = null;
     if (req.body.anclaDetails) { try { anclaDetails = JSON.parse(req.body.anclaDetails); } catch(e) {} }
 
-    // Procesar imagen a Base64
+    // Subir imagen a Cloudinary y obtener su URL segura
     let profileImage = null;
     if (req.file) {
-      profileImage = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      profileImage = await uploadToCloudinary(req.file.buffer);
     }
 
     const newUser = new User({
@@ -166,7 +190,7 @@ app.post('/api/update-profile', upload.single('image'), async (req, res) => {
     };
 
     if (req.file) {
-      updateData.profileImage = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      updateData.profileImage = await uploadToCloudinary(req.file.buffer);
     }
 
     const updatedUser = await User.findOneAndUpdate({ id: req.body.id }, updateData, { new: true });
@@ -268,7 +292,7 @@ app.get('/api/matches/:id', async (req, res) => {
 });
 
 // ==========================================
-// RUTAS DE ADMINISTRACIÓN Y MOTOR MATEMÁTICO DE CITAS
+// RUTAS DE ADMINISTRACIÓN Y MOTOR DE CITAS
 // ==========================================
 
 app.get('/api/admin/dashboard', async (req, res) => {
@@ -277,7 +301,7 @@ app.get('/api/admin/dashboard', async (req, res) => {
     const interactions = await Interaction.find({});
     const rawAppointments = await Appointment.find({});
 
-    // Traducir los IDs a Nombres de empresa para una lectura clara en el panel de admin
+    // Traducir IDs a Nombres comerciales en las citas del Admin
     const appointments = rawAppointments.map(app => {
       const appObj = app.toObject();
       const reqUser = users.find(u => u.id === appObj.requestedBy);
@@ -348,7 +372,6 @@ app.post('/api/admin/optimize-calendar', async (req, res) => {
             horaFin: endTimeStr
           };
           await app.save();
-          slotSign = true;
           slotAssigned = true;
         }
 
