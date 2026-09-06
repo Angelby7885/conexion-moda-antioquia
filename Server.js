@@ -275,7 +275,18 @@ app.get('/api/admin/dashboard', async (req, res) => {
   try {
     const users = await User.find({});
     const interactions = await Interaction.find({});
-    const appointments = await Appointment.find({});
+    const rawAppointments = await Appointment.find({});
+
+    // Traducir los IDs a Nombres de empresa para una lectura clara en el panel de admin
+    const appointments = rawAppointments.map(app => {
+      const appObj = app.toObject();
+      const reqUser = users.find(u => u.id === appObj.requestedBy);
+      const targetUser = users.find(u => u.id === appObj.targetUser);
+
+      appObj.requestedBy = reqUser ? reqUser.name : appObj.requestedBy;
+      appObj.targetUser = targetUser ? targetUser.name : appObj.targetUser;
+      return appObj;
+    });
 
     res.json({
       totalUsers: users.length,
@@ -337,6 +348,7 @@ app.post('/api/admin/optimize-calendar', async (req, res) => {
             horaFin: endTimeStr
           };
           await app.save();
+          slotSign = true;
           slotAssigned = true;
         }
 
