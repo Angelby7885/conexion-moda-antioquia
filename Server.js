@@ -334,7 +334,7 @@ app.post('/api/admin/optimize-calendar', async (req, res) => {
       return res.status(400).json({ error: 'No hay citas o matches pendientes para optimizar.' });
     }
 
-    const duration = parseInt(durationMinutes) || 6; 
+    const duration = parseInt(durationMinutes) || 10; 
     const startParts = (startTime || '08:00').split(':');
     const endParts = (endTime || '17:00').split(':');
 
