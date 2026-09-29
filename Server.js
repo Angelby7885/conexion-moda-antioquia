@@ -320,14 +320,15 @@ app.get('/api/admin/dashboard', async (req, res) => {
 
 app.post('/api/admin/optimize-calendar', async (req, res) => {
   try {
-    const { startTime, endTime, durationMinutes } = req.body;
+    const { startTime, endTime } = req.body;
     const appointments = await Appointment.find({});
 
     if (!appointments || appointments.length === 0) {
       return res.status(400).json({ error: 'No hay citas o matches pendientes para optimizar.' });
     }
 
-    const duration = parseInt(durationMinutes) || 10; 
+    // FORZAMOS LA DURACIÓN A 10 MINUTOS CLAVADOS (Ignorando lo que mande el front para evitar errores de cálculo raros)
+    const duration = 10; 
     const startParts = (startTime || '08:00').split(':');
     const endParts = (endTime || '17:00').split(':');
 
@@ -355,6 +356,7 @@ app.post('/api/admin/optimize-calendar', async (req, res) => {
           userBusyTimes[user1].push(timeStr);
           userBusyTimes[user2].push(timeStr);
 
+          // Suma exactamente 10 minutos (10 * 60000 milisegundos)
           const slotEndIter = new Date(slotTimeIter.getTime() + duration * 60000);
           const endTimeStr = slotEndIter.toTimeString().substring(0, 5);
 
@@ -368,11 +370,12 @@ app.post('/api/admin/optimize-calendar', async (req, res) => {
           slotAssigned = true;
         }
 
+        // Avanza el reloj exactamente 10 minutos por cada intento de slot
         slotTimeIter = new Date(slotTimeIter.getTime() + duration * 60000);
       }
     }
 
-    res.json({ message: '¡Calendario optimizado con éxito mediante algoritmo matemático!' });
+    res.json({ message: '¡Calendario optimizado con éxito a bloques exactos de 10 minutos!' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -400,7 +403,7 @@ const mongooseOptions = {
 async function startServer() {
   try {
     console.log('Conectando a MongoDB Atlas...');
-    await mongoose.connect(MONGODB_URI, mongooseOptions);
+    await mongoose.processConnect = await mongoose.connect(MONGODB_URI, mongooseOptions);
     console.log('¡Conexión exitosa a la base de datos MongoDB Atlas!');
 
     // El servidor solo arranca cuando la base de datos responde
