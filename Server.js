@@ -32,15 +32,8 @@ const uploadToCloudinary = (fileBuffer) => {
 };
 
 // ==========================================
-// CONEXIÓN A MONGODB ATLAS
+// CONFIGURACIÓN Y MODELOS DE MONGOOSE
 // ==========================================
-const MONGODB_URI = "mongodb+srv://angelby7885_db_user:DuxSgCcJOU9mkfJW@angelby7885.eseusbj.mongodb.net/conexion_moda?retryWrites=true&w=majority&appName=Angelby7885";
-
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('Conexión exitosa a la base de datos MongoDB Atlas'))
-  .catch(err => console.error('Error conectando a MongoDB Atlas:', err));
-
-// Definición de Modelos (Mongoose Schemas)
 const userSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true, trim: true },
   name: { type: String, required: true },
@@ -219,7 +212,7 @@ app.get('/api/profiles/:id', async (req, res) => {
     const interactedIds = interactions.map(i => i.targetId);
 
     let query = { 
-      id: { $ne: currentUserId, $nin: interactedIds }, 
+      id: { $ne: currentUserId,$nin: interactedIds }, 
       email: { $ne: 'admin@conexionmoda.com' } 
     };
 
@@ -394,7 +387,30 @@ app.get('/matches', (req, res) => res.sendFile(path.join(__dirname, 'public', 'm
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/register', (req, res) => res.sendFile(path.join(__dirname, 'public', 'register.html')));
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor B2B Conexión Moda Antioquia corriendo en el puerto ${PORT}`);
-});
+// ==========================================
+// CONEXIÓN A MONGODB ATLAS Y ARRANQUE SEGURO
+// ==========================================
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://angelby7885_db_user:DuxSgCcJOU9mkfJW@angelby7885.eseusbj.mongodb.net/conexion_moda?retryWrites=true&w=majority&appName=Angelby7885";
+
+const mongooseOptions = {
+  serverSelectionTimeoutMS: 15000,
+  socketTimeoutMS: 45000,
+};
+
+async function startServer() {
+  try {
+    console.log('Conectando a MongoDB Atlas...');
+    await mongoose.connect(MONGODB_URI, mongooseOptions);
+    console.log('¡Conexión exitosa a la base de datos MongoDB Atlas!');
+
+    // El servidor solo arranca cuando la base de datos responde
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor B2B Conexión Moda Antioquia corriendo en el puerto ${PORT}`);
+    });
+  } catch (err) {
+    console.error('❌ Error crítico al conectar a MongoDB Atlas:', err.message);
+    process.exit(1);
+  }
+}
+
+startServer();
